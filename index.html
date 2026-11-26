@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>🌻 สำหรับเธอ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Mali:wght@400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; min-width: 0; }
+  body {
+    font-family: 'Mali', sans-serif; min-height: 100vh; overflow-x: hidden;
+    background: linear-gradient(180deg, #fff8e1 0%, #ffe9a8 100%);
+    color: #5d4037; display: flex; align-items: center; justify-content: center; text-align: center;
+    padding: 24px 0;
+  }
+  .screen { position: relative; z-index: 2; width: 90%; max-width: 380px; }
+  .hidden { display: none; }
+  .flower { width: 200px; height: 200px; cursor: pointer;
+    animation: sway 3s ease-in-out infinite; transform-origin: 50% 100%;
+    filter: drop-shadow(0 10px 14px rgba(180,120,0,.25)); }
+  @keyframes sway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  .hint { margin-top: 18px; font-size: 19px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 50% { opacity: .4; } }
+  .card { background: #fff; border-radius: 24px; padding: 28px 22px;
+    box-shadow: 0 10px 30px rgba(180,120,0,.2); animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.9); opacity: 0; } }
+  .emoji { font-size: 44px; margin-bottom: 6px; }
+  .msg { font-size: 20px; line-height: 1.7; min-height: 130px;
+    display: flex; align-items: center; justify-content: center; white-space: pre-line; }
+  .dots { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffe082; }
+  .dots i.on { background: #ffb300; }
+  button { font-family: inherit; font-size: 17px; border: none; border-radius: 999px;
+    padding: 10px 28px; margin-top: 16px; background: #ffb300; color: #fff; min-height: 44px;
+    box-shadow: 0 4px 0 #e08e00; cursor: pointer; }
+  button:active { transform: translateY(2px); box-shadow: 0 2px 0 #e08e00; }
+  button:disabled { opacity: .4; cursor: default; }
+  button:focus-visible, textarea:focus-visible { outline: 3px solid #6d4c41; outline-offset: 2px; }
+  .ghost { background: transparent; color: #a1887f; box-shadow: none; font-size: 15px; margin-top: 6px; }
+  textarea { width: 100%; border: 2px solid #ffd54f; border-radius: 16px; padding: 12px;
+    font-family: inherit; font-size: 16px; margin-top: 12px; resize: none; color: #5d4037; }
+  .petal { position: fixed; top: -50px; z-index: 1; pointer-events: none;
+    animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(115vh) rotate(360deg); } }
+  .music { position: fixed; top: 14px; right: 14px; z-index: 4; width: 46px; height: 46px;
+    padding: 0; margin: 0; border-radius: 50%; font-size: 20px; background: #fff;
+    box-shadow: 0 4px 12px rgba(180,120,0,.3); animation: bob 2s ease-in-out infinite; }
+  .music.off { animation: none; opacity: .7; }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .flower, .hint, .card { animation: none; }
+    .petal { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="intro" class="screen">
+    <svg id="flower" class="flower" viewBox="-100 -100 200 200" role="button" aria-label="แตะเพื่อเปิด"></svg>
+    <p class="hint">แตะดอกทานตะวันสิ 💛</p>
+  </div>
+
+  <div id="story" class="screen hidden">
+    <div class="card">
+      <div id="emoji" class="emoji">🌻</div>
+      <div id="msg" class="msg"></div>
+      <div id="dots" class="dots"></div>
+      <button id="next" disabled>ต่อ ➜</button>
+    </div>
+  </div>
+
+  <div id="reply" class="screen hidden">
+    <div class="card" id="replyCard">
+      <div class="emoji">💌</div>
+      <div class="msg" style="min-height:auto">อยากบอกอะไรกลับมา<br>พิมพ์ตรงนี้ได้เลยนะ</div>
+      <textarea id="replyText" rows="3" placeholder="พิมพ์ข้อความ..."></textarea>
+      <button id="send">ส่ง 💛</button>
+    </div>
+  </div>
+
+  <button id="music" class="music hidden" aria-label="เปิด/ปิดเพลง">🎵</button>
+
+
+<script>
+{
+  // ====== แก้ตรงนี้ ======
+  const NAME = 'ชื่อเธอ';
+  const MESSAGES = [
+    { e: '🌻', t: `สวัสดีนะ ${NAME}` },
+    { e: '🌻', t: 'รู้ไหมว่าทำไม\nถึงให้ดอกทานตะวัน?' },
+    { e: '☀️', t: 'เพราะทานตะวัน\nหันหาดวงอาทิตย์เสมอ' },
+    { e: '🌻', t: 'เหมือนเรา\nที่หันหาเธอทุกครั้ง' },
+    { e: '🥛', t: 'ส่วนนมสด...\nเลือกหวานน้อยให้นะ' },
+    { e: '🤭', t: 'เพราะความหวานที่เหลือ\nเก็บไว้ให้เธอหมดแล้ว' },
+    { e: '💛', t: 'ดื่มนมให้อร่อยนะ\nขอให้วันนี้เป็นวันที่ดีของเธอ' },
+  ];
+
+  // =======================
+
+  // ลิงก์ GAS (ทำงานเบื้องหลัง: ส่งเพลง + เก็บคำตอบลงชีต)
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwztiUDFJiUwF5ZD6GVYCvSddU-6lUBQliburvOaQTFG6HY9TIBg5O1ULqYFElgLyk/exec';
+
+  const $ = id => document.getElementById(id);
+
+  // ---------- เพลง ----------
+  // เพลงหลักโหลดจาก Drive ผ่าน GAS (fetch) · ถ้าโหลดไม่ได้จะเล่นเสียงกล่องดนตรีแทน
+  const MELODY = [['E5',1],['G5',1],['A5',1],['G5',1],['E5',1],['D5',1],['C5',2],
+    ['D5',1],['E5',1],['G5',1],['E5',1],['D5',2],[null,2],
+    ['E5',1],['G5',1],['C6',1],['B5',1],['A5',1],['G5',1],['E5',2],
+    ['F5',1],['E5',1],['D5',1],['E5',1],['C5',3],[null,1]];
+  const BASS = [['C4',0],['E4',4],['G3',8],['B3',12],['A3',16],['E4',20],['F3',24],['G3',28]];
+  const BEAT = 0.42, LOOP = 32, VOL = 0.5;
+  const hz = n => {
+    const m = n.match(/^([A-G])(#?)(\d)$/);
+    const s = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0);
+    return 440 * 2 ** ((12 * (+m[3] + 1) + s - 69) / 12);
+  };
+  // เสียงเงียบสั้นๆ ไว้ปลดล็อกเสียงบนไอโฟน ระหว่างรอเพลงโหลด
+  const silentUrl = () => {
+    const n = 1600, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) b[o + i] = s.charCodeAt(i); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVEfmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 8000, true);
+    v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    w(36, 'data'); v.setUint32(40, n, true); b.fill(128, 44);
+    return URL.createObjectURL(new Blob([b], { type: 'audio/wav' }));
+  };
+
+  const music = {
+    audio: new Audio(), state: 'none', // none | loading | ready | failed
+    ctx: null, master: null, on: false, off: false,
+    load() {
+      this.state = 'loading';
+      fetch(GAS_URL + '?action=song')
+        .then(r => r.json())
+        .then(d => {
+          if (!d.ok || !d.song) throw new Error('no song');
+          const b64 = d.song;
+          let url;
+          try {
+            const bin = atob(b64), u8 = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+            url = URL.createObjectURL(new Blob([u8], { type: 'audio/mpeg' }));
+          } catch (e) {
+            url = 'data:audio/mpeg;base64,' + b64;
+          }
+          this.audio.src = url;
+          this.audio.loop = true;
+          this.audio.volume = 0.8;
+          this.state = 'ready';
+          if (this.on && !this.off && !this.ctx) this.audio.play().catch(() => this.startBox());
+        })
+        .catch(() => { this.state = 'failed'; if (this.on) this.startBox(); });
+    },
+    start() {
+      if (this.on) return;
+      this.on = true;
+      $('music').classList.remove('hidden');
+      if (this.state === 'ready') {
+        this.audio.play().catch(() => this.startBox());
+      } else if (this.state === 'loading') {
+        this.audio.src = silentUrl();
+        this.audio.play().catch(() => {});
+      } else {
+        this.startBox();
+      }
+    },
+    startBox() {
+      if (this.ctx) return;
+      this.audio.pause();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.ctx.resume && this.ctx.resume();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = this.off ? 0 : VOL;
+      this.master.connect(this.ctx.destination);
+      this.loop(this.ctx.currentTime + 0.1);
+    },
+    loop(t0) {
+      let t = t0;
+      for (const [n, b] of MELODY) {
+        if (n) { this.tone(hz(n), t, 1.4, 0.22); this.tone(hz(n) * 2, t, 0.6, 0.04); }
+        t += b * BEAT;
+      }
+      for (const [n, at] of BASS) this.tone(hz(n), t0 + at * BEAT, 2.4, 0.1);
+      const next = t0 + LOOP * BEAT;
+      setTimeout(() => this.loop(next), Math.max(0, (next - this.ctx.currentTime - 1.5) * 1000));
+    },
+    tone(f, t, dur, vol) {
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'triangle';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+      g.connect(this.master);
+      o.start(t);
+      o.stop(t + dur + 0.05);
+    },
+    toggle() {
+      this.off = $('music').classList.toggle('off');
+      $('music').textContent = this.off ? '🔇' : '🎵';
+      if (this.ctx) {
+        this.master.gain.setTargetAtTime(this.off ? 0 : VOL, this.ctx.currentTime, 0.1);
+      } else if (this.state === 'ready') {
+        this.off ? this.audio.pause() : this.audio.play().catch(() => {});
+      }
+    }
+  };
+  music.load();
+  $('music').addEventListener('click', () => music.toggle());
+  // --------------------------
+
+  let petalsSvg = '';
+  for (let i = 0; i < 16; i++) {
+    petalsSvg += `<ellipse cx="0" cy="-55" rx="16" ry="38" fill="${i % 2 ? '#ffca28' : '#ffb300'}" transform="rotate(${i * 22.5})"/>`;
+  }
+  let seeds = '';
+  for (let i = 0; i < 40; i++) {
+    const a = i * 2.39996, r = 3.6 * Math.sqrt(i);
+    seeds += `<circle cx="${(r * Math.cos(a)).toFixed(1)}" cy="${(r * Math.sin(a)).toFixed(1)}" r="1.8" fill="#4e342e"/>`;
+  }
+  $('flower').innerHTML = petalsSvg + '<circle r="38" fill="#6d4c41"/><circle r="28" fill="#795548"/>' + seeds;
+
+  const seg = (window.Intl && Intl.Segmenter) ? new Intl.Segmenter('th', { granularity: 'grapheme' }) : null;
+  const splitChars = s => seg ? [...seg.segment(s)].map(x => x.segment) : Array.from(s);
+
+  let idx = 0, timer = null;
+  function show(i) {
+    const m = MESSAGES[i];
+    $('emoji').textContent = m.e;
+    $('msg').textContent = '';
+    $('next').disabled = true;
+    $('dots').innerHTML = MESSAGES.map((_, j) => `<i class="${j <= i ? 'on' : ''}"></i>`).join('');
+    const chars = splitChars(m.t);
+    let k = 0;
+    clearInterval(timer);
+    timer = setInterval(() => {
+      $('msg').textContent += chars[k++];
+      if (k >= chars.length) { clearInterval(timer); $('next').disabled = false; }
+    }, 60);
+  }
+
+  function rain(n) {
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div');
+      d.className = 'petal';
+      d.textContent = Math.random() < 0.7 ? '🌻' : '💛';
+      d.style.left = Math.random() * 100 + 'vw';
+      d.style.fontSize = (14 + Math.random() * 20) + 'px';
+      d.style.animationDuration = (4 + Math.random() * 4) + 's';
+      d.style.animationDelay = (Math.random() * 3) + 's';
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 12000);
+    }
+  }
+
+  $('flower').addEventListener('click', () => {
+    $('intro').classList.add('hidden');
+    $('story').classList.remove('hidden');
+    music.start();
+    rain(25);
+    show(0);
+  });
+
+  $('next').addEventListener('click', () => {
+    idx++;
+    if (idx < MESSAGES.length) {
+      show(idx);
+    } else {
+      $('story').classList.add('hidden');
+      $('reply').classList.remove('hidden');
+      rain(35);
+    }
+  });
+
+  function done() {
+    $('replyCard').innerHTML = '<div class="emoji">🥰</div><div class="msg">ได้รับแล้วน้า<br>ขอบคุณนะ 💛</div><button class="ghost" id="again">ดูอีกครั้ง ↺</button>';
+    $('again').addEventListener('click', () => location.reload());
+    rain(40);
+  }
+
+  $('send').addEventListener('click', () => {
+    const text = $('replyText').value.trim();
+    if (!text) { $('replyText').focus(); return; }
+    $('send').disabled = true;
+    $('send').textContent = 'กำลังส่ง...';
+    const fail = () => { $('send').disabled = false; $('send').textContent = 'ลองส่งอีกครั้ง'; };
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ text })
+    })
+      .then(r => r.json())
+      .then(d => d.ok ? done() : fail())
+      .catch(fail);
+  });
+}
+</script>
+</body>
+</html>
